@@ -34,7 +34,7 @@ demo = gr.Interface(
     fn=summarize_text,
     inputs=gr.Textbox(type="text"),
     outputs="text",
-    title="Text Summarization",
+    title="Text Summarization (Action Works!)",
     description="Insert a text to summarize"
 )
 
