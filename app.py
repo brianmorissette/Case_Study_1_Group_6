@@ -1,16 +1,22 @@
 import os
 import gradio as gr
 from huggingface_hub import InferenceClient
+import dotenv
 
 pipe = None
 stop_infrence = False
+
+dotenv.load_dotenv()
 
 client = InferenceClient(
     provider="hf-inference",
     api_key=os.getenv("HF_TOKEN"),
 )
 
-def summarize_text(text):
+def summarize_text(
+        text,
+        use_local_model: bool,
+    ):
     """
     Summarize the text
     """
@@ -28,12 +34,12 @@ def summarize_text(text):
 
             output = pipe(
                 text,
-                max_length = 2000,
-                min_length = 1000,
+                max_length = 500,
+                min_length = 50,
                 do_sample = False,
             )
 
-            return output["summary_text"]
+            return output[0]["summary_text"]
 
         except Exception as e:
             return f"Error: {str(e)}"
@@ -60,8 +66,8 @@ demo = gr.Interface(
         gr.Checkbox(label="Use Local Model", value = False)
     ],
     outputs = "text",
-    title="Medical Text Summarization",
-    description="Insert a text to summarize"
+    title = "Medical Text Summarization",
+    description = "Insert a text to summarize"
 )
 
 if __name__ == "__main__":
