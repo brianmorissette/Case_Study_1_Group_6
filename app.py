@@ -14,6 +14,8 @@ def summarize_text(text):
     """
     Summarize the text
     """
+    global pipe
+
     if text is None:
         return "No text inserted"
 
@@ -27,8 +29,12 @@ def summarize_text(text):
 
             output = pipe(
                 text,
-                return_text=True
+                max_length = 2000,
+                min_length = 1000,
+                do_sample = False,
             )
+
+            return output["summary_text"]
 
         except Exception as e:
             return f"Error: {str(e)}"
