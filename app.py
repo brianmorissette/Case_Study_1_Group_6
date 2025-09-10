@@ -34,8 +34,8 @@ def summarize_text(
 
             output = pipe(
                 text,
-                max_length = 500,
-                min_length = 50,
+                max_length = 1000,
+                min_length = 250,
                 do_sample = False,
             )
 
@@ -46,6 +46,8 @@ def summarize_text(
     
     else:
         try:
+            print("[MODE] api")
+
             # Use the summarization model
             output = client.summarization(text, model="Falconsai/medical_summarization")
             
