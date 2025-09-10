@@ -23,7 +23,6 @@ def summarize_text(text):
         try:
             print("[MODE] local")
             from transformers import pipeline
-            import torch
             if pipe is None:
                 pipe = pipeline("summarization" , model="Falconsai/medical_summarization")
 
