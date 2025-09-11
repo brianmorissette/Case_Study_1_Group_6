@@ -63,12 +63,12 @@ def summarize_text(
 # Create the Gradio interface
 demo = gr.Interface(
     fn = summarize_text,
-    inputs = gr.Textbox(type="text"),
+    inputs = gr.Textbox(lines=15),
     additional_inputs = [
         gr.Checkbox(label="Use Local Model", value = False)
     ],
-    outputs = "text",
-    title = "Medical Text Summarization",
+    outputs = gr.Textbox(lines=15),
+    title = "Medical Text Summarization", 
     description = "Insert a text to summarize"
 )
 
