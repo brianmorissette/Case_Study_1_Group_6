@@ -1,3 +1,5 @@
 gradio
 huggingface_hub
 dotenv
+transformers
+torch
