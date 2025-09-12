@@ -69,7 +69,7 @@ demo = gr.Interface(
     ],
     outputs = gr.Textbox(lines=15),
     title = "Medical Text Summarization", 
-    description = "Insert a text to summarize"
+    description = "Insert a medical text to summarize"
 )
 
 if __name__ == "__main__":
