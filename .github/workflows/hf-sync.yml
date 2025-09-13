@@ -1,12 +1,15 @@
 name: Sync to Hugging Face Space
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Test Models"]       
+    types: [completed]
   workflow_dispatch:
 
 jobs:
   sync-to-space:
+    # only run if tests passed
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
