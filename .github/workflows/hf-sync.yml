@@ -10,10 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
         
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: git push https://brianmorissette:$HF_TOKEN@huggingface.co/spaces/brianmorissette/Case_Study_1_Group_6 main
-
