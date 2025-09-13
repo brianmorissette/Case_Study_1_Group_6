@@ -2,7 +2,7 @@ name: Notify Tests Result to Slack
 
 on:
   workflow_run:
-    workflows: ["Tests"]      # must match the name: of your tests workflow
+    workflows: ["Test Models"]      # must match the name: of your tests workflow
     types: [completed]
 
 jobs:
