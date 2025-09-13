@@ -1,0 +1,38 @@
+name: Notify Tests Result to Slack
+
+on:
+  workflow_run:
+    workflows: ["Tests"]      # must match the name: of your tests workflow
+    types: [completed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    # Optional: only notify when tests ran on main; remove this line to notify for all branches
+    if: ${{ github.event.workflow_run.head_branch == 'main' }}
+
+    steps:
+      - name: Build message
+        id: build
+        run: |
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          if [ "$CONCLUSION" = "success" ]; then
+            STATUS="✅ Tests passed"
+          else
+            STATUS="❌ Tests ${CONCLUSION}"
+          fi
+
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          COMMIT="${{ github.event.workflow_run.head_sha }}"
+          REPO="${{ github.repository }}"
+
+          printf '%s' "{\"text\":\"${STATUS} for \`${REPO}\` on \`${BRANCH}\`\\nCommit: \`${COMMIT}\`\\nRun: ${RUN_URL}\"}" > payload.json
+
+      - name: Send Slack message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+               --data @payload.json \
+               "$SLACK_WEBHOOK_URL"
