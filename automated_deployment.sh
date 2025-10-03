@@ -1,6 +1,5 @@
 #! /bin/bash
 
-
 PORT=22006
 MACHINE=paffenroth-23.dyn.wpi.edu
 STUDENT_ADMIN_KEY_PATH=$HOME/.ssh
