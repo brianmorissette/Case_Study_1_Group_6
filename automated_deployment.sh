@@ -38,15 +38,14 @@ ls -l authorized_keys
 cat authorized_keys
 
 # Copy the authorized_keys file to the server
-scp -i student-admin_key -P ${PORT} -o StrictHostKeyChecking=no authorized_keys student-admin@${MACHINE}:~/.ssh/
-
+scp -i student-admin_key -P ${PORT} -o StrictHostKeyChecking=no authorized_keys student-admin@>
 # Add the key to the ssh-agent
 eval "$(ssh-agent -s)"
 ssh-add my_key
 
 # Check the key file on the server
 echo "checking that the authorized_keys file is correct"
-ssh -p ${PORT} -o StrictHostKeyChecking=no student-admin@${MACHINE} "cat ~/.ssh/authorized_keys"
+ssh -p ${PORT} -o StrictHostKeyChecking=no student-admin@${MACHINE} "cat ~/.ssh/authorized_key>
 
 # Check that the code is installed and start up the product
 COMMAND="ssh -p ${PORT} -o StrictHostKeyChecking=no student-admin@${MACHINE}"
