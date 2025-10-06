@@ -12,11 +12,8 @@ fi
 
 if [ "$STATUS" -eq 200]; then
     echo "Product up and running"
-    if [$(cat "$STATUS_FILE") -eq 0]; then
-        chmod 700 automated_deployment.sh
-        ./automated_deployment.sh
-        echo 1 > "$STATE_FILE"
 else
     echo "Product not responding (status: $STATUS)"
-    echo 0 > "$STATE_FILE"
+    chmod 700 automated_deployment.sh
+    ~/automated_deployment.sh
 fi
