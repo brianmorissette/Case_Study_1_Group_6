@@ -54,6 +54,9 @@ ${COMMAND} "git clone https://github.com/brianmorissette/Case_Study_1_Group_6.gi
 ${COMMAND} "ls Case_Study_1_Group_6"
 ${COMMAND} "sudo apt install -qq -y python3-venv"
 ${COMMAND} "cd Case_Study_1_Group_6 && python3 -m venv venv"
-${COMMAND} "cd Case_Study_1_Group_6 && source venv/bin/activate && pip install -r requirements>
-scp -P ${PORT} -o StrictHostKeyChecking=no .env student-admin@${MACHINE}:Case_Study_1_Group_6/
-${COMMAND} "nohup Case_Study_1_Group_6/venv/bin/python3 Case_Study_1_Group_6/app.py > log.txt >
+${COMMAND} "cd Case_Study_1_Group_6 && source venv/bin/activate && pip install -r requirements.txt"
+
+# Copy Hugging Face Token to VM
+scp -i my_key -P ${PORT} -o StrictHostKeyChecking=no authorized_keys student-admin@${MACHINE}:~
+
+${COMMAND} "nohup Case_Study_1_Group_6/venv/bin/python3 Case_Study_1_Group_6/app.py > log.txt 2>&1 &"
