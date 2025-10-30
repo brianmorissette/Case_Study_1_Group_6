@@ -1,11 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-WORKDIR /app
+RUN pip install uv
+
+WORKDIR /appcd .ssh
 
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv sync
 
 EXPOSE 7860
 
-CMD ["python", "app.py"]
+CMD ["uv", "run", "app.py"]
