@@ -10,4 +10,6 @@ RUN uv sync
 
 EXPOSE 7860
 
+ENV GRADIO_SERVER_NAME="0.0.0.0"
+
 CMD ["uv", "run", "app.py"]
