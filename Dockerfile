@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 RUN pip install uv
 
-WORKDIR /appcd .ssh
+WORKDIR /app
 
 COPY . .
 
