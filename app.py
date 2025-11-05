@@ -2,9 +2,16 @@ import os
 import gradio as gr
 from huggingface_hub import InferenceClient
 import dotenv
+from prometheus_client import start_http_server, Counter, Summary
 
 pipe = None
 stop_infrence = False
+
+# --- Prometheus metrics ---
+REQUEST_COUNTER       = Counter('app_requests_total',               'Total number of requests')
+SUCCESSFUL_REQUESTS   = Counter('app_successful_requests_total',    'Total number of successful requests')
+FAILED_REQUESTS       = Counter('app_failed_requests_total',        'Total number of failed requests')
+REQUEST_DURATION      = Summary('app_request_duration_seconds',     'Time spent processing request')
 
 dotenv.load_dotenv()
 
@@ -38,10 +45,11 @@ def summarize_text(
                 min_length = 250,
                 do_sample = False,
             )
-
+            SUCCESSFUL_REQUESTS.inc()
             return output[0]["summary_text"]
 
         except Exception as e:
+            FAILED_REQUESTS.inc()
             return f"Error: {str(e)}"
     
     else:
@@ -53,11 +61,14 @@ def summarize_text(
             
             # Find the summary text
             if output:
+                SUCCESSFUL_REQUESTS.inc()
                 return output.summary_text
             else:
+                FAILED_REQUESTS.inc()
                 return "No summary result"
                 
         except Exception as e:
+            FAILED_REQUESTS.inc()
             return f"Error: {str(e)}"
 
 # Create the Gradio interface
@@ -73,4 +84,7 @@ demo = gr.Interface(
 )
 
 if __name__ == "__main__":
+    # Start the Prometheus HTTP server
+    start_http_server(8000)
+    # Start the Gradio interface
     demo.launch()
