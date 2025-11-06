@@ -8,14 +8,10 @@ stop_infrence = False
 
 dotenv.load_dotenv()
 
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.getenv("HF_TOKEN"),
-)
-
 def summarize_text(
         text,
         use_local_model: bool,
+        hf_token
     ):
     """
     Summarize the text
@@ -48,6 +44,14 @@ def summarize_text(
         try:
             print("[MODE] api")
 
+            if not hf_token:
+                return "Please provide a valid Hugging Face API token."
+
+            client = InferenceClient(
+                provider="hf-inference",
+                api_key=hf_token,
+            )
+
             # Use the summarization model
             output = client.summarization(text, model="Falconsai/medical_summarization")
             
@@ -63,9 +67,10 @@ def summarize_text(
 # Create the Gradio interface
 demo = gr.Interface(
     fn = summarize_text,
-    inputs = gr.Textbox(lines=15),
-    additional_inputs = [
-        gr.Checkbox(label="Use Local Model", value = False)
+    inputs=[
+        gr.Textbox(label="Medical Text", lines=15, placeholder="Paste your medical text here..."),
+        gr.Checkbox(label="Use Local Model", value=False),
+        gr.Textbox(label="Hugging Face Token (required for API mode)", type="password"),
     ],
     outputs = gr.Textbox(lines=15),
     title = "Medical Text Summarization", 
