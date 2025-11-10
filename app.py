@@ -12,22 +12,23 @@ REQUEST_COUNTER       = Counter('app_requests_total',               'Total numbe
 SUCCESSFUL_REQUESTS   = Counter('app_successful_requests_total',    'Total number of successful requests')
 FAILED_REQUESTS       = Counter('app_failed_requests_total',        'Total number of failed requests')
 REQUEST_DURATION      = Summary('app_request_duration_seconds',     'Time spent processing request')
+LOCAL_MODEL_REQUESTS  = Counter('app_local_model_requests_total',   'Total number of requests using local model')
+API_MODEL_REQUESTS    = Counter('app_api_model_requests_total',     'Total number of requests using API model')
 
 dotenv.load_dotenv()
 
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.getenv("HF_TOKEN"),
-)
-
 def summarize_text(
         text,
+        hf_token: str,
         use_local_model: bool,
     ):
     """
     Summarize the text
     """
     global pipe
+    
+    # Track total requests
+    REQUEST_COUNTER.inc()
 
     if text is None:
         return "No text inserted"
@@ -35,16 +36,22 @@ def summarize_text(
     if use_local_model:
         try:
             print("[MODE] local")
-            from transformers import pipeline
-            if pipe is None:
-                pipe = pipeline("summarization" , model="Falconsai/medical_summarization")
+            # Track local model usage
+            LOCAL_MODEL_REQUESTS.inc()
+            
+            # Measure request duration
+            with REQUEST_DURATION.time():
+                from transformers import pipeline
+                if pipe is None:
+                    pipe = pipeline("summarization" , model="Falconsai/medical_summarization")
 
-            output = pipe(
-                text,
-                max_length = 1000,
-                min_length = 250,
-                do_sample = False,
-            )
+                output = pipe(
+                    text,
+                    max_length = 1000,
+                    min_length = 250,
+                    do_sample = False,
+                )
+            
             SUCCESSFUL_REQUESTS.inc()
             return output[0]["summary_text"]
 
@@ -55,9 +62,26 @@ def summarize_text(
     else:
         try:
             print("[MODE] api")
-
-            # Use the summarization model
-            output = client.summarization(text, model="Falconsai/medical_summarization")
+            # Track API model usage
+            API_MODEL_REQUESTS.inc()
+            
+            # Use token from user input or fallback to .env
+            token = hf_token.strip() if hf_token and hf_token.strip() else os.getenv("HF_TOKEN")
+            
+            if not token:
+                FAILED_REQUESTS.inc()
+                return "Error: HuggingFace token is required for API mode. Please provide a token or set HF_TOKEN in .env file."
+            
+            # Create client with the token
+            client = InferenceClient(
+                provider="hf-inference",
+                api_key=token,
+            )
+            
+            # Measure request duration
+            with REQUEST_DURATION.time():
+                # Use the summarization model
+                output = client.summarization(text, model="Falconsai/medical_summarization")
             
             # Find the summary text
             if output:
@@ -74,13 +98,14 @@ def summarize_text(
 # Create the Gradio interface
 demo = gr.Interface(
     fn = summarize_text,
-    inputs = gr.Textbox(lines=15),
-    additional_inputs = [
-        gr.Checkbox(label="Use Local Model", value = False)
+    inputs = [
+        gr.Textbox(lines=15, label="Medical Text", placeholder="Enter medical text to summarize..."),
+        gr.Textbox(label="HuggingFace Token", type="password", placeholder="Enter your HF token"),
+        gr.Checkbox(label="Use Local Model", value=False)
     ],
-    outputs = gr.Textbox(lines=15),
+    outputs = gr.Textbox(lines=15, label="Summary"),
     title = "Medical Text Summarization", 
-    description = "Insert a medical text to summarize"
+    description = "Insert a medical text to summarize. For API mode, provide your HuggingFace token."
 )
 
 if __name__ == "__main__":
